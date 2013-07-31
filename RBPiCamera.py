@@ -66,7 +66,7 @@ def snap_photo (args_list, image_path = None):
 	else:
 		res_image = IMAGE_FILE_PATH
 	
-	args = "--output " + res_image + " "  + parse_args(args_list, 2000)
+	args = "--output " + res_image + " "  + parse_args(args_list, 2500)
 
 	command = RBPI_PHOTO_COMMAND + " " + args
 	print command
