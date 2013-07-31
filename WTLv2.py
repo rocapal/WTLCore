@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 #  Copyright (C) 2013
 #
@@ -27,6 +27,7 @@ from sys import stdout
 from temp import read_temp
 from RBPiCamera import snap_photo
 import RPi.GPIO as GPIO
+import signal
 
 gpsd = None 
 
@@ -104,20 +105,26 @@ def get_file_name (datetime):
   except:
     print "Not well formed the filename with: " + datetime
     return None
- 
+
+
+def func (signum, frame):
+  print "SIGTERM"
+  sys.exit()
+
 if __name__ == '__main__':
 
-  init()
+  signal.signal(signal.SIGTERM, func)	
 
   gpsp = GpsPoller()
+
   try:
-    gpsp.start() 
-    
+    init()
+    gpsp.start()
 
     list = ['|','/','-','\\']
     c = 0
 
-    SLEEP_DATA = 15
+    SLEEP_DATA = 90
     DIR = "/home/pi/WTLv2-data/"
 
     while True:
@@ -160,12 +167,13 @@ if __name__ == '__main__':
 
         # Save the picture
         args = []
-        arg1 = {"name": "width" , "argument": "640"}
-        arg2 = {"name": "height", "argument": "480"}
-	arg3 = {"name": "exposure", "argument": "auto"}
-        args.append(arg1);
-        args.append(arg2);
-	args.append(arg3);
+
+
+        args.append({"name": "width" , "argument": "1920"});
+        args.append({"name": "height", "argument": "1080"});
+	args.append({"name": "exposure", "argument": "sports"});
+        args.append({"name": "hflip", "argument": "true"});
+        args.append({"name": "vflip", "argument": "true"});
 
         snap_photo(args, DIR + file_name + "I")
 
@@ -185,6 +193,8 @@ if __name__ == '__main__':
     GPIO.output(RED,True)
     GPIO.output(GREEN,True)
     GPIO.output(BLUE,True)
-    gpsp.running = False
-    gpsp.join() # wait for the thread to finish what it's doing
+    if gpsp.is_alive():
+      gpsp.running = False
+      gpsp.join()
+
   print "Done.\nExiting."
